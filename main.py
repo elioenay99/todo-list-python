@@ -14,7 +14,7 @@ class TodoApp:
         self.frame = tk.Frame(root)
         self.frame.pack(pady=10)
 
-        self.task_listbox = tk.Listbox(self.frame, width=50, height=10, selectmode=tk.SINGLE)
+        self.task_listbox = tk.Listbox(self.frame, width=100, height=5, selectmode=tk.SINGLE)
         self.task_listbox.pack(side=tk.LEFT, fill=tk.BOTH)
 
         self.scrollbar = tk.Scrollbar(self.frame)
@@ -26,25 +26,29 @@ class TodoApp:
         self.entry = tk.Entry(root, width=50)
         self.entry.pack(pady=10)
 
+        self.button_frame = tk.Frame(self.root)
+        self.button_frame.pack()
+
         self.priority_var = tk.StringVar(value="Média")
-        self.priority_menu = tk.OptionMenu(root, self.priority_var, "Alta", "Média", "Baixa")
-        self.priority_menu.pack(pady=5)
+        self.priority_menu = tk.OptionMenu(self.button_frame, self.priority_var, "Alta", "Média", "Baixa")
+        self.priority_menu.grid(row=2, column=0)
 
-        self.add_button = tk.Button(root, text="Adicionar Tarefas", command=self.add_task)
-        self.add_button.pack(pady=5)
+        self.add_button = tk.Button(self.button_frame, text="Adicionar Tarefas", command=self.add_task)
+        self.add_button.grid(row=1, column=0)
 
-        self.edit_button = tk.Button(root, text="Editar Tarefas", command=self.edit_task)
-        self.edit_button.pack(pady=5)
+        self.edit_button = tk.Button(self.button_frame, text="Editar Tarefas", command=self.edit_task)
+        self.edit_button.grid(row=1, column=1)
 
-        self.remove_button = tk.Button(root, text="Remover Tarefas", command=self.remove_task)
-        self.remove_button.pack(pady=5)
+        self.remove_button = tk.Button(self.button_frame, text="Remover Tarefas", command=self.remove_task)
+        self.remove_button.grid(row=1, column=2)
 
-        self.mark_done_button = tk.Button(root, text="Marcar como Concluída", command=self.mark_task_done)
-        self.mark_done_button.pack(pady=5)
+        self.mark_done_button = tk.Button(self.button_frame, text="Marcar como Concluída", command=self.mark_task_done)
+        self.mark_done_button.grid(row=2, column=1)
 
         self.filter_var = tk.StringVar(value="Todas")
-        self.filter_menu = tk.OptionMenu(root, self.filter_var, "Todas", "Pendentes", "Concluídas", command=self.filter_tasks)
-        self.filter_menu.pack(pady=5)
+        self.filter_menu = tk.OptionMenu(self.button_frame, self.filter_var, "Todas", "Pendentes", "Concluídas",
+                                         command=self.filter_tasks)
+        self.filter_menu.grid(row=2, column=2)
 
         self.load_tasks()
 
@@ -87,7 +91,8 @@ class TodoApp:
             self.task_manager.mark_task_done(selected_task_index)
             self.task_listbox.delete(selected_task_index)
             task, priority, done = self.task_manager.tasks[selected_task_index]
-            self.task_listbox.insert(selected_task_index, f"{task} [{priority}] - Concluída" if done else f"{task} [{priority}]")
+            self.task_listbox.insert(selected_task_index,
+                                     f"{task} [{priority}] - Concluída" if done else f"{task} [{priority}]")
         except IndexError:
             messagebox.showwarning("Cuidado", "Você não selecionou nenhuma tarefa para marcar como concluída.")
 
