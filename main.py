@@ -26,22 +26,52 @@ class TodoApp:
         self.entry = tk.Entry(root, width=50)
         self.entry.pack(pady=10)
 
+        self.priority_var = tk.StringVar(value="Média")
+        self.priority_menu = tk.OptionMenu(root, self.priority_var, "Alta", "Média", "Baixa")
+        self.priority_menu.pack(pady=5)
+
         self.add_button = tk.Button(root, text="Adicionar Tarefas", command=self.add_task)
         self.add_button.pack(pady=5)
 
+        self.edit_button = tk.Button(root, text="Editar Tarefas", command=self.edit_task)
+        self.edit_button.pack(pady=5)
+
         self.remove_button = tk.Button(root, text="Remover Tarefas", command=self.remove_task)
         self.remove_button.pack(pady=5)
+
+        self.mark_done_button = tk.Button(root, text="Marcar como Concluída", command=self.mark_task_done)
+        self.mark_done_button.pack(pady=5)
+
+        self.filter_var = tk.StringVar(value="Todas")
+        self.filter_menu = tk.OptionMenu(root, self.filter_var, "Todas", "Pendentes", "Concluídas", command=self.filter_tasks)
+        self.filter_menu.pack(pady=5)
 
         self.load_tasks()
 
     def add_task(self):
         task = self.entry.get()
+        priority = self.priority_var.get()
         if task:
-            self.task_manager.add_task(task)
-            self.task_listbox.insert(tk.END, task)
+            self.task_manager.add_task(task, priority)
+            self.task_listbox.insert(tk.END, f"{task} [{priority}]")
             self.entry.delete(0, tk.END)
         else:
             messagebox.showwarning("Cuidado", "Você não colocou nenhuma tarefa.")
+
+    def edit_task(self):
+        try:
+            selected_task_index = self.task_listbox.curselection()[0]
+            task = self.entry.get()
+            priority = self.priority_var.get()
+            if task:
+                self.task_manager.edit_task(selected_task_index, task, priority)
+                self.task_listbox.delete(selected_task_index)
+                self.task_listbox.insert(selected_task_index, f"{task} [{priority}]")
+                self.entry.delete(0, tk.END)
+            else:
+                messagebox.showwarning("Cuidado", "Você não colocou nenhuma tarefa.")
+        except IndexError:
+            messagebox.showwarning("Cuidado", "Você não selecionou nenhuma tarefa para editar.")
 
     def remove_task(self):
         try:
@@ -51,10 +81,32 @@ class TodoApp:
         except IndexError:
             messagebox.showwarning("Cuidado", "Você não selecionou nenhuma tarefa para remover.")
 
+    def mark_task_done(self):
+        try:
+            selected_task_index = self.task_listbox.curselection()[0]
+            self.task_manager.mark_task_done(selected_task_index)
+            self.task_listbox.delete(selected_task_index)
+            task, priority, done = self.task_manager.tasks[selected_task_index]
+            self.task_listbox.insert(selected_task_index, f"{task} [{priority}] - Concluída" if done else f"{task} [{priority}]")
+        except IndexError:
+            messagebox.showwarning("Cuidado", "Você não selecionou nenhuma tarefa para marcar como concluída.")
+
+    def filter_tasks(self, filter_option):
+        self.task_listbox.delete(0, tk.END)
+        tasks = self.task_manager.filter_tasks(filter_option)
+        for task, priority, done in tasks:
+            display_text = f"{task} [{priority}]"
+            if done:
+                display_text += " - Concluída"
+            self.task_listbox.insert(tk.END, display_text)
+
     def load_tasks(self):
         tasks = self.task_manager.load_tasks()
-        for task in tasks:
-            self.task_listbox.insert(tk.END, task)
+        for task, priority, done in tasks:
+            display_text = f"{task} [{priority}]"
+            if done:
+                display_text += " - Concluída"
+            self.task_listbox.insert(tk.END, display_text)
 
 
 if __name__ == "__main__":
